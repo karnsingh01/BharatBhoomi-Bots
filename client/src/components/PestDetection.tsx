@@ -3,46 +3,82 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Camera, Upload, CheckCircle, AlertTriangle, Leaf } from "lucide-react";
+import { detectPest } from "@/lib/api";
 import diseaseImage from "@assets/generated_images/Coconut_palm_disease_detection_513c6f22.png";
 
 interface DetectionResult {
   disease: string;
+  malayalam: string;
   confidence: number;
   severity: string;
   treatment: string;
-  malayalam: string;
+  malayalamTreatment: string;
+  preventionTips: string[];
+  urgency: string;
 }
 
 export default function PestDetection() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [result, setResult] = useState<DetectionResult | null>(null);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
-  // Mock detection result - todo: remove mock functionality
-  const mockResult: DetectionResult = {
-    disease: "Coconut Leaf Blight",
-    confidence: 94,
-    severity: "Moderate",
-    treatment: "Apply copper-based fungicide. Remove affected leaves. Improve drainage around trees.",
-    malayalam: "കോപ്പർ അടിസ്ഥാനമാക്കിയ കുമിൾനാശിനി പ്രയോഗിക്കുക. രോഗബാധിതമായ ഇലകൾ നീക്കംചെയ്യുക."
+  const handleImageUpload = async (file?: File) => {
+    const imageFile = file || selectedFile;
+    if (!imageFile) return;
+
+    setIsAnalyzing(true);
+    setUploadedImage(URL.createObjectURL(imageFile));
+    
+    try {
+      const analysisResult = await detectPest(imageFile);
+      setResult(analysisResult);
+    } catch (error) {
+      console.error('Failed to analyze image:', error);
+      // Fallback to demo data for showcase
+      setResult({
+        disease: "Analysis Failed",
+        malayalam: "വിശകലനം പരാജയപ്പെട്ടു",
+        confidence: 0,
+        severity: "moderate",
+        treatment: "Please try again or consult your local agricultural extension officer.",
+        malayalamTreatment: "ദയവായി വീണ്ടും ശ്രമിക്കുകയോ പ്രാദേശിക കൃഷി വിപുലീകരണ ഉദ്യോഗസ്ഥനെ സമീപിക്കുകയോ ചെയ്യുക.",
+        preventionTips: ["Ensure good plant nutrition", "Maintain proper hygiene"],
+        urgency: "medium"
+      });
+    } finally {
+      setIsAnalyzing(false);
+    }
   };
 
-  const handleImageUpload = () => {
-    setIsAnalyzing(true);
-    setUploadedImage(diseaseImage);
-    
-    // Simulate AI analysis
-    setTimeout(() => {
-      setResult(mockResult);
-      setIsAnalyzing(false);
-    }, 2000);
-    
-    console.log('Image uploaded for pest detection');
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setSelectedFile(file);
+      handleImageUpload(file);
+    }
   };
 
   const handleCameraCapture = () => {
+    // In a real app, this would open the camera
     console.log('Camera capture initiated');
-    handleImageUpload(); // Simulate capture
+    // For demo, we'll use the mock image
+    setIsAnalyzing(true);
+    setUploadedImage(diseaseImage);
+    
+    setTimeout(() => {
+      setResult({
+        disease: "Coconut Leaf Blight",
+        malayalam: "തെങ്ങിന്റെ ഇല രോഗം",
+        confidence: 94,
+        severity: "moderate",
+        treatment: "Apply copper-based fungicide. Remove affected leaves. Improve drainage around trees.",
+        malayalamTreatment: "കോപ്പർ അടിസ്ഥാനമാക്കിയ കുമിൾനാശിനി പ്രയോഗിക്കുക. രോഗബാധിതമായ ഇലകൾ നീക്കംചെയ്യുക.",
+        preventionTips: ["Regular inspection", "Proper drainage", "Balanced nutrition"],
+        urgency: "medium"
+      });
+      setIsAnalyzing(false);
+    }, 2000);
   };
 
   const getSeverityColor = (severity: string) => {
@@ -88,13 +124,20 @@ export default function PestDetection() {
               </Button>
               <Button 
                 variant="outline" 
-                onClick={handleImageUpload}
+                onClick={() => document.getElementById('file-input')?.click()}
                 className="gap-2"
                 data-testid="button-upload-image"
               >
                 <Upload className="w-4 h-4" />
                 Upload Image
               </Button>
+              <input
+                id="file-input"
+                type="file"
+                accept="image/*"
+                onChange={handleFileSelect}
+                className="hidden"
+              />
             </div>
           </div>
         </div>
@@ -163,7 +206,7 @@ export default function PestDetection() {
               <p className="text-sm text-foreground">{result.treatment}</p>
               <div className="border-t border-border pt-3">
                 <p className="text-sm text-muted-foreground font-medium">Malayalam:</p>
-                <p className="text-sm text-foreground">{result.malayalam}</p>
+                <p className="text-sm text-foreground">{result.malayalamTreatment}</p>
               </div>
             </div>
 

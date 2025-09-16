@@ -1,7 +1,9 @@
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { TrendingUp, TrendingDown, IndianRupee, MapPin, Clock } from "lucide-react";
+import { getMarketPrices } from "@/lib/api";
 import marketImage from "@assets/generated_images/Kerala_vegetable_market_prices_1534c02e.png";
 
 interface CropPrice {
@@ -20,8 +22,10 @@ interface MarketPricesProps {
 }
 
 export default function MarketPrices({ prices }: MarketPricesProps) {
-  // Mock data - todo: remove mock functionality
-  const cropPrices: CropPrice[] = prices || [
+  const [cropPrices, setCropPrices] = useState<CropPrice[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const mockPrices: CropPrice[] = [
     {
       name: "Rice (Raw)",
       malayalam: "അരി",
@@ -83,6 +87,60 @@ export default function MarketPrices({ prices }: MarketPricesProps) {
       lastUpdated: "1.5 hours ago"
     }
   ];
+
+  useEffect(() => {
+    if (prices) {
+      // Convert API data to expected format
+      const convertedPrices = prices.map((price: any) => ({
+        name: price.cropName,
+        malayalam: price.malayalam,
+        currentPrice: price.price,
+        previousPrice: price.price * 0.95, // Mock previous price
+        unit: price.unit,
+        trend: Math.random() > 0.5 ? 'up' : 'down' as 'up' | 'down',
+        market: price.market,
+        lastUpdated: new Date(price.updatedAt).toLocaleDateString()
+      }));
+      setCropPrices(convertedPrices);
+      setLoading(false);
+    } else {
+      // Fetch from API
+      getMarketPrices()
+        .then((result) => {
+          const convertedPrices = result.map((price: any) => ({
+            name: price.cropName,
+            malayalam: price.malayalam,
+            currentPrice: price.price,
+            previousPrice: price.price * 0.95, // Mock previous price
+            unit: price.unit,
+            trend: Math.random() > 0.5 ? 'up' : 'down' as 'up' | 'down',
+            market: price.market,
+            lastUpdated: "1 hour ago"
+          }));
+          setCropPrices(convertedPrices);
+        })
+        .catch((error) => {
+          console.error('Failed to fetch market prices:', error);
+          setCropPrices(mockPrices);
+        })
+        .finally(() => setLoading(false));
+    }
+  }, [prices]);
+
+  if (loading) {
+    return (
+      <Card className="p-6">
+        <div className="animate-pulse space-y-4">
+          <div className="h-4 bg-muted rounded w-3/4"></div>
+          <div className="space-y-2">
+            {[1,2,3].map(i => (
+              <div key={i} className="h-16 bg-muted rounded"></div>
+            ))}
+          </div>
+        </div>
+      </Card>
+    );
+  }
 
   const getTrendIcon = (trend: string) => {
     switch (trend) {

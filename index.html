@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GramVaani - Your Rural Assistant</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #F7F9F2;
+        }
+        #app-container {
+            background-size: cover;
+            background-position: center;
+            background-image: url('https://t4.ftcdn.net/jpg/12/50/32/05/240_F_1250320539_mSBEKgn75R0ITYmIU0euFdPaWRw8tsnO.jpg');
+        }
+        #welcome-modal {
+            background-image: url('https://images.unsplash.com/photo-1620714223084-86c9df2492a4?q=80&w=1974&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+        }
+        .agri-header {
+            background: linear-gradient(135deg, #2E7D32, #4CAF50);
+        }
+        .nav-item.active {
+            color: #2E7D32;
+        }
+        .card, .page-title {
+            background-color: rgba(255, 255, 255, 0.95);
+            /* --- NEW: Subtle cloud texture for all content cards and titles --- */
+            background-image: url('https://www.transparenttextures.com/patterns/soft-wallpaper.png');
+            backdrop-filter: blur(5px);
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            transition: transform 0.2s ease-in-out;
+        }
+        .card:hover {
+            transform: translateY(-2px);
+        }
+        .btn-primary {
+             background-color: #4CAF50;
+             transition: background-color 0.2s ease;
+        }
+        .btn-primary:hover {
+            background-color: #388E3C;
+        }
+        .gemini-btn {
+            background: linear-gradient(135deg, #4e54c8, #8f94fb);
+            color: white;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+
+    <!-- Welcome/Language Chooser Modal -->
+    <div id="welcome-modal" class="fixed inset-0 bg-white flex items-center justify-center z-50">
+        <div class="bg-white/80 backdrop-blur-md p-6 rounded-2xl shadow-2xl text-center">
+            <img src="https://placehold.co/100x100/4CAF50/FFFFFF?text=GV" alt="GramVaani Logo" class="mx-auto mb-4 rounded-full border-4 border-white shadow-lg">
+            <h2 class="text-2xl font-bold text-gray-800 mb-2">GramVaani</h2>
+            <p class="text-gray-600 mb-6">Kripya apni bhasha chunein<br/>Please select your language</p>
+            <div id="welcome-language-grid" class="grid grid-cols-2 gap-4 max-w-xs mx-auto"></div>
+        </div>
+    </div>
+
+    <!-- Main App Container -->
+    <div id="app-container" class="max-w-md mx-auto h-screen bg-white flex flex-col shadow-2xl hidden">
+        <header class="agri-header text-white p-4 flex justify-between items-center shadow-md z-10">
+            <div class="w-8"></div>
+            <h1 id="app-title" class="text-xl font-bold"></h1>
+            <button id="language-btn" class="hover:opacity-80">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m4 1h5l-5 5h5l-5 5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            </button>
+        </header>
+        <main id="content" class="flex-grow p-4 overflow-y-auto pb-20"></main>
+        <nav class="bg-white border-t-2 border-gray-100 grid grid-cols-5 gap-1 p-2 fixed bottom-0 w-full max-w-md mx-auto">
+            <button class="nav-item flex flex-col items-center" data-page="home"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg><span class="nav-text text-xs" data-key="home"></span></button>
+            <button class="nav-item flex flex-col items-center" data-page="market"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v.01"/></svg><span class="nav-text text-xs" data-key="mandi"></span></button>
+            <button class="nav-item flex flex-col items-center" data-page="weather"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"/></svg><span class="nav-text text-xs" data-key="mausam"></span></button>
+            <button class="nav-item flex flex-col items-center" data-page="health"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9" /></svg><span class="nav-text text-xs" data-key="swasthya"></span></button>
+            <button class="nav-item flex flex-col items-center" data-page="community"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg><span class="nav-text text-xs" data-key="samaj"></span></button>
+        </nav>
+    </div>
+
+    <!-- Modals -->
+    <div id="voice-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50"><div class="bg-white rounded-xl p-6 w-11/12 max-w-sm"><h3 class="voice-modal-text text-lg font-medium text-center" data-key="voiceModalTitle"></h3><p class="voice-modal-text text-xs text-center text-gray-500 mb-4" data-key="voiceModalSubtitle"></p><input type="text" id="voice-input" class="w-full border-2 border-gray-300 rounded-lg p-2 focus:border-green-500 focus:ring-0"><div class="mt-4 flex justify-end space-x-2"><button id="cancel-voice" class="voice-modal-text px-4 py-2 bg-gray-200 rounded-lg" data-key="voiceModalCancel"></button><button id="submit-voice" class="voice-modal-text px-4 py-2 btn-primary text-white rounded-lg" data-key="voiceModalSubmit"></button></div></div></div>
+    <div id="language-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50"><div class="bg-white rounded-xl p-6 w-11/12 max-w-sm"><div class="flex justify-between items-center mb-4"><h3 class="lang-modal-text text-lg font-medium" data-key="langModalTitle"></h3><button id="close-lang-modal" class="text-gray-500 text-2xl font-bold hover:text-gray-800">&times;</button></div><div id="language-grid" class="grid grid-cols-3 gap-4"></div></div></div>
+    <div id="scheme-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50 p-4"><div class="w-full max-w-sm rounded-2xl p-6 text-center shadow-2xl" style="background: linear-gradient(135deg, #E8F5E9, #C8E6C9);"><div class="mx-auto bg-green-500 rounded-full h-16 w-16 flex items-center justify-center -mt-12 border-4 border-white"><svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg></div><h3 id="scheme-modal-title" class="text-xl mt-4 font-bold text-green-800"></h3><p id="scheme-popup-text" class="text-gray-700 my-3"></p><button id="close-scheme-modal" class="px-6 py-2 mt-2 btn-primary text-white rounded-full shadow-lg"></button></div></div>
+    <div id="gemini-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50 p-4"><div class="bg-white rounded-xl p-6 w-11/12 max-w-sm"><div id="gemini-content"></div></div></div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // --- DOM ELEMENTS ---
+        const content = document.getElementById('content');
+        const navItems = document.querySelectorAll('.nav-item');
+        const appContainer = document.getElementById('app-container');
+        const welcomeModal = document.getElementById('welcome-modal');
+        const welcomeLanguageGrid = document.getElementById('welcome-language-grid');
+        const voiceModal = document.getElementById('voice-modal');
+        const languageModal = document.getElementById('language-modal');
+        const schemeModal = document.getElementById('scheme-modal');
+        const geminiModal = document.getElementById('gemini-modal');
+        const geminiContent = document.getElementById('gemini-content');
+        const voiceInput = document.getElementById('voice-input');
+
+        // --- DATA ---
+        let currentLanguage = 'en';
+        const translations = { 
+            'en': {
+                appName: "GramVaani", welcomeMessage: "Namaste, Sunita Devi!", infoForToday: "Key information for today.",
+                weather: "Weather", marketPrice: "Mandi Price", newCustomer: "New Customer!", newCustomerMsg: "1 hotel has contacted for fresh spinach.",
+                askAnything: "Have a question? Press the mic button.", home: "Home", mandi: "Mandi", mausam: "Weather",
+                swasthya: "Health", samaj: "Community", yojana: "Schemes", govtSchemes: "Government Schemes",
+                schemesCardDesc: "See PM-Kisan, Fasal Bima and other schemes.", mandiTitle: "Ghaziabad Mandi Prices",
+                directSellTitle: "Direct Sell to Buyers", directSellDesc: "Sell your produce directly to customers and earn more profit.",
+                findBuyersBtn: "Find New Buyers", weatherTitle: "Weather of Muradnagar", communityTitle: "Farmer Community",
+                newQuestionBtn: "+ New Question", healthTitle: "Health Information", govtHealthScheme: "Government Health Scheme",
+                govtHealthSchemeDesc: "Get free treatment up to 5 lakhs under Ayushman Bharat Yojana. Visit your nearest health center for information.",
+                newSchemePopupTitle: "New Scheme Information!", newSchemePopupBtn: "OK", voiceModalTitle: "Ask Your Question",
+                voiceModalSubtitle: "(In prototype, please type the question)", voiceModalCancel: "Cancel", voiceModalSubmit: "Ask",
+                langModalTitle: "Select Language",
+                errorText: "Sorry, I could not understand your question. Please try using different words.",
+                recipeBtn: "✨ Make Recipe", improvingQuery: "Improving your question with AI...", recipeGenerating: "Getting a recipe for you...",
+                aiQueryHelperTitle: "AI Question Helper", improvedQuery: "Improved Question:", useThisBtn: "Use This",
+                schemeAdvisorTitle: "✨ AI Scheme Advisor", schemeAdvisorBtn: "Which scheme is for me?",
+                schemeAdvisorPrompt: "To find the best schemes for you, please provide some information.",
+                landSizeLabel: "Land Size (in acres)", cropTypeLabel: "Main Crop Type", getAdviceBtn: "Get Advice",
+                schemeAdviceGenerating: "Finding the best schemes for you...", schemeAdviceTitle: "Recommended Schemes for You:"
+            },
+            'hi': {
+                appName: "GramVaani (ग्रामवाणी)", welcomeMessage: "नमस्ते, सुनीता देवी!", infoForToday: "आज के लिए मुख्य जानकारी।",
+                weather: "मौसम", marketPrice: "मंडी भाव", newCustomer: "नये ग्राहक!", newCustomerMsg: "1 होटल ने ताज़ा पालक के लिए संपर्क किया है।",
+                askAnything: "कुछ पूछना है? माइक बटन दबाएं।", home: "होम", mandi: "मंडी", mausam: "मौसम",
+                swasthya: "स्वास्थ्य", samaj: "समाज", yojana: "योजनाएं", govtSchemes: "सरकारी योजनाएं",
+                schemesCardDesc: "पीएम-किसान, फसल बीमा और अन्य योजनाएं देखें।", mandiTitle: "गाजियाबाद मंडी भाव",
+                directSellTitle: "सीधे खरीदारों को बेचें", directSellDesc: "अपना सामान सीधे ग्राहक को बेचें और ज़्यादा मुनाफा कमाएं।",
+                findBuyersBtn: "नए ग्राहक ढूंढें", weatherTitle: "मुरादनगर का मौसम", communityTitle: "किसान समाज",
+                newQuestionBtn: "+ नया सवाल", healthTitle: "स्वास्थ्य जानकारी", govtHealthScheme: "सरकारी स्वास्थ्य योजना",
+                govtHealthSchemeDesc: "आयुष्मान भारत योजना के तहत 5 लाख तक का मुफ्त इलाज पाएं। जानकारी के लिए अपने नजदीकी स्वास्थ्य केंद्र जाएं।",
+                newSchemePopupTitle: "नयी योजना की जानकारी!", newSchemePopupBtn: "ठीक है", voiceModalTitle: "आपका सवाल पूछें",
+                voiceModalSubtitle: "(प्रोटोटाइपे में, कृपया सवाल टाइप करें)", voiceModalCancel: "कैंसिल", voiceModalSubmit: "पूछें",
+                langModalTitle: "भाषा चुनें",
+                errorText: "माफ़ कीजिये, मैं आपका सवाल समझ नहीं पाया। कृपया दूसरे शब्दों का प्रयोग करें।",
+                recipeBtn: "✨ रेसिपी बनाएं", improvingQuery: "AI से आपका सवाल बेहतर हो रहा है...", recipeGenerating: "आपके लिए रेसिपी बना रहे हैं...",
+                aiQueryHelperTitle: "AI सवाल सहायक", improvedQuery: "सुधरा हुआ सवाल", useThisBtn: "इसे इस्तेमाल करें",
+                schemeAdvisorTitle: "✨ AI योजना सलाहकार", schemeAdvisorBtn: "मेरे लिए कौनसी योजना?",
+                schemeAdvisorPrompt: "आपके लिए सर्वोत्तम योजनाएं खोजने के लिए, कृपया कुछ जानकारी प्रदान करें।",
+                landSizeLabel: "ज़मीन का आकार (एकड़ में)", cropTypeLabel: "मुख्य फसल का प्रकार", getAdviceBtn: "सलाह लें",
+                schemeAdviceGenerating: "आपके लिए सर्वोत्तम योजनाएं ढूंढ रहे हैं...", schemeAdviceTitle: "आपके लिए सुझाई गई योजनाएं:"
+            }
+        };
+        const languages = [ { code: 'hi', name: 'हिन्दी' }, { code: 'en', name: 'English' }, { code: 'pa', name: 'ਪੰਜਾਬੀ' }, { code: 'bn', name: 'বাংলা' }, { code: 'mr', name: 'मराठी' }, { code: 'te', name: 'తెలుగు' }, { code: 'ta', name: 'தமிழ்' }, { code: 'gu', name: 'ગુજરાતી' }, { code: 'kn', name: 'ಕನ್ನಡ' } ];
+        const marketData = { 'tamatar': { en: 'Tomato', hi: 'टमाटर', price: '₹18 - ₹22 / kg', trend: 'up' }, 'lauki': { en: 'Gourd', hi: 'लौकी', price: '₹25 - ₹30 / kg', trend: 'stable' }, 'mirch': { en: 'Chili', hi: 'मिर्च', price: '₹45 - ₹50 / kg', trend: 'down' } };
+        const weatherData = { today: { day: {en: 'Today', hi: 'आज'}, temp: '32°C', icon: '☀️' }, tomorrow: { day: {en: 'Tomorrow', hi: 'कल'}, temp: '29°C', icon: '☁️' }, dayAfter: { day: {en: 'Day After', hi: 'परसों'}, temp: '28°C', icon: '🌧️' } };
+        const communityPosts = [ { user: 'Ramesh Kumar', query: {en: 'My chili leaves are curling. What should I do?', hi: 'मेरी मिर्च के पत्ते मुड़ रहे हैं। इसके लिए क्या करूं?'}, replies: 2, avatar: '👨‍🌾' }, { user: 'Seema Singh', query: {en: 'Found a direct buyer for my spinach in Noida. Getting a great price!', hi: 'नोएडा में मेरी पालक के लिए सीधा खरीदार मिल गया। बढ़िया दाम मिल रहा है!'}, replies: 5, avatar: '👩‍🌾' } ];
+        const healthData = { 'tip': { title: {en: 'Daily Health Tip', hi: 'दैनिक स्वास्थ्य सुझाव'}, text: {en: 'Drink at least 8 glasses of water daily.', hi: 'रोज कम से कम 8 गिलास पानी पिएं।'}, icon: '💧'}, 'bukhar': { title: {en: 'Fever', hi: 'बुखार'}, text: {en: 'For mild fever, take rest and drink plenty of fluids. Visit a doctor if it is high or lasts more than 2 days.', hi: 'हल्के बुखार के लिए आराम करें और खूब सारे तरल पदार्थ पिएं। यदि यह तेज है या 2 दिनों से अधिक समय तक रहता है, तो डॉक्टर से मिलें।'}}, 'khaansi': { title: {en: 'Cough', hi: 'खांसी'}, text: {en: 'Drink warm water with honey and ginger. Avoid cold items. See a doctor if it doesn\'t improve.', hi: 'शहद और अदरक के साथ गर्म पानी पिएं। ठंडी चीजों से बचें। यदि इसमें सुधार नहीं होता है तो डॉक्टर को दिखाएं।'}} };
+        const schemesData = [ { name: {en: 'PM-Kisan Samman Nidhi', hi: 'पीएम-किसान सम्मान निधि'}, desc: {en: '₹6000 per year financial aid to eligible farmer families.', hi: 'सभी पात्र किसान परिवारों को प्रति वर्ष ₹6000 की वित्तीय सहायता।'}, icon: '💰', isNew: true }, { name: {en: 'PM Fasal Bima Yojana', hi: 'पीएम फसल बीमा योजना'}, desc: {en: 'Insurance coverage for farmers in the event of crop failure.', hi: 'फसल खराब होने की स्थिति में किसानों को बीमा कवरेज।'}, icon: '🌾' }, { name: {en: 'Kisan Credit Card (KCC)', hi: 'किसान क्रेडिट कार्ड (KCC)'}, desc: {en: 'Provides credit to farmers for their cultivation needs.', hi: 'किसानों को उनकी खेती की जरूरतों के लिए ऋण प्रदान करता है।'}, icon: '💳' } ];
+
+        // --- CORE FUNCTIONS ---
+        const T = (key) => translations[currentLanguage][key] || key;
+
+        const setLanguage = (lang) => {
+            currentLanguage = translations[lang] ? lang : 'en';
+            localStorage.setItem('userLanguage', lang);
+            document.getElementById('app-title').textContent = T('appName');
+            document.querySelectorAll('.nav-text').forEach(el => el.textContent = T(el.dataset.key));
+            document.querySelectorAll('.voice-modal-text').forEach(el => el.textContent = T(el.dataset.key));
+            document.querySelectorAll('.lang-modal-text').forEach(el => el.textContent = T(el.dataset.key));
+            document.getElementById('scheme-modal-title').textContent = T('newSchemePopupTitle');
+            document.getElementById('close-scheme-modal').textContent = T('newSchemePopupBtn');
+        };
+
+        const navigateTo = (page) => {
+            navItems.forEach(item => item.classList.toggle('active', item.dataset.page === page));
+            
+            let contentHTML = '';
+            if (page === 'home') contentHTML = getHomePageHTML();
+            else if (page === 'market') contentHTML = getMarketPageHTML();
+            else if (page === 'weather') contentHTML = getWeatherPageHTML();
+            else if (page === 'health') contentHTML = getHealthPageHTML();
+            else if (page === 'community') contentHTML = getCommunityPageHTML();
+            else if (page === 'schemes') contentHTML = getSchemesPageHTML();
+            content.innerHTML = contentHTML;
+            
+            // Re-bind events for dynamically created elements
+            if(page === 'home') {
+                 document.getElementById('mic-button').addEventListener('click', () => voiceModal.classList.remove('hidden'));
+                 document.querySelectorAll('.dashboard-card').forEach(card => card.addEventListener('click', (e) => navigateTo(e.currentTarget.dataset.page)));
+            } else if (page === 'market') {
+                document.querySelectorAll('.gemini-recipe-btn').forEach(btn => btn.addEventListener('click', handleRecipeRequest));
+            } else if (page === 'community') {
+                document.getElementById('ai-helper-btn').addEventListener('click', handleAiHelper);
+            } else if (page === 'schemes') {
+                document.getElementById('scheme-advisor-btn').addEventListener('click', handleSchemeAdvisor);
+            }
+        };
+        
+        // --- HTML TEMPLATE FUNCTIONS ---
+        const getHomePageHTML = () => `
+            <div class="space-y-4">
+                <div><h2 class="text-2xl font-bold text-gray-800">${T('welcomeMessage')}</h2><p class="text-gray-500">${T('infoForToday')}</p></div>
+                <div class="grid grid-cols-2 gap-4">
+                    ${createCard(T('weather'), weatherData.today.icon, weatherData.today.temp, 'weather', 'bg-blue-100/90', 'text-blue-800')}
+                    ${createCard(T('marketPrice'), marketData.tamatar[currentLanguage], `${marketData.tamatar.price.split(' ')[0]} ▲`, 'market', 'bg-yellow-100/90', 'text-yellow-800')}
+                </div>
+                ${createCard(healthData.tip.title[currentLanguage], healthData.tip.icon, healthData.tip.text[currentLanguage], 'health', 'bg-pink-100/90', 'text-pink-800', 'col-span-2')}
+                <div class="bg-indigo-100/90 text-indigo-800 p-4 rounded-xl flex justify-between items-center card cursor-pointer" onclick="navigateTo('schemes')"><div><p class="font-bold">${T('govtSchemes')}</p><p class="text-sm">${T('schemesCardDesc')}</p></div><span class="text-2xl">🏛️</span></div>
+                <div class="text-center pt-6"><p class="text-gray-600 mb-4 bg-white/50 rounded-lg p-1">${T('askAnything')}</p><button id="mic-button" class="btn-primary text-white rounded-full p-6 shadow-lg hover:bg-green-700 transition-transform transform hover:scale-110"><svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-14 0m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/></svg></button></div>
+            </div>`;
+
+        const getMarketPageHTML = () => `<h2 class="page-title text-xl font-bold mb-4 text-gray-800 p-2 rounded-lg">${T('mandiTitle')}</h2>${Object.entries(marketData).map(([key, item]) => createPriceCard(key, item)).join('')}<div class="mt-6 card bg-blue-50/90 border border-blue-200 p-4"><h3 class="font-bold text-blue-800 mb-2">${T('directSellTitle')}</h3><p class="text-blue-700 text-sm mb-3">${T('directSellDesc')}</p><button class="w-full bg-blue-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-600">${T('findBuyersBtn')}</button></div>`;
+        const getWeatherPageHTML = () => `<h2 class="page-title text-xl font-bold mb-4 text-gray-800 p-2 rounded-lg">${T('weatherTitle')}</h2><div class="grid grid-cols-3 gap-4 text-center">${createWeatherCard(weatherData.today)}${createWeatherCard(weatherData.tomorrow)}${createWeatherCard(weatherData.dayAfter)}</div>`;
+        const getCommunityPageHTML = () => `<div class="flex justify-between items-center mb-4 page-title p-2 rounded-lg"><h2 class="text-xl font-bold text-gray-800">${T('communityTitle')}</h2><button class="btn-primary text-white font-bold py-2 px-4 rounded-lg text-sm">${T('newQuestionBtn')}</button></div><div class="card p-4 mb-4"><textarea id="community-question" class="w-full border-2 border-gray-200 rounded-lg p-2" rows="3" placeholder="${currentLanguage === 'hi' ? 'अपना सवाल यहां लिखें...' : 'Write your question here...'}"></textarea><button id="ai-helper-btn" class="gemini-btn w-full font-bold py-2 px-4 rounded-lg mt-2">✨ ${currentLanguage === 'hi' ? 'AI से सवाल सुधारें' : 'Improve Question with AI'}</button></div>${communityPosts.map(post => `<div class="card p-4 mb-4"><div class="flex items-start space-x-3"><span class="text-3xl">${post.avatar}</span><div><p class="font-bold">${post.user}</p><p class="text-gray-700 mt-1">${post.query[currentLanguage]}</p><p class="text-sm text-blue-600 mt-2 font-semibold">${post.replies} Replies</p></div></div></div>`).join('')}`;
+        const getHealthPageHTML = () => `<h2 class="page-title text-xl font-bold mb-4 text-gray-800 p-2 rounded-lg">${T('healthTitle')}</h2>${createHealthCard(healthData.bukhar)} ${createHealthCard(healthData.khaansi)}<div class="mt-6 card bg-green-50/90 border border-green-200 p-4"><h3 class="font-bold text-green-800 mb-2">${T('govtHealthScheme')}</h3><p class="text-green-700 text-sm mb-3">${T('govtHealthSchemeDesc')}</p></div>`;
+        const getSchemesPageHTML = () => `<h2 class="page-title text-xl font-bold mb-4 text-gray-800 p-2 rounded-lg">${T('govtSchemes')}</h2><div class="card p-4 mb-4"><button id="scheme-advisor-btn" class="gemini-btn w-full font-bold py-3 px-4 rounded-lg">${T('schemeAdvisorBtn')}</button></div><div class="space-y-3">${schemesData.map(scheme => createSchemeCard(scheme)).join('')}</div>`;
+
+        // --- COMPONENT CREATORS ---
+        const createCard = (title, icon, text, page, bgColor, textColor, extra = '') => `<div class="dashboard-card card ${bgColor} p-4 rounded-xl cursor-pointer ${extra}" data-page="${page}"><p class="font-bold text-sm">${title}</p><p class="text-3xl font-bold my-1">${icon}</p><p class="font-semibold text-xs">${text}</p></div>`;
+        const createPriceCard = (key, item) => `<div class="card p-4 mb-3"><div class="flex justify-between items-center"><div><p class="font-bold text-gray-700">${item[currentLanguage]}</p><p class="text-lg font-bold text-green-800">${item.price}</p></div><div class="text-right"><span class="text-2xl ${item.trend === 'up' ? 'text-green-500' : 'text-red-500'}">${item.trend === 'up' ? '▲' : '▼'}</span></div></div><button class="gemini-recipe-btn gemini-btn w-full font-bold py-2 px-4 rounded-lg mt-3 text-sm" data-veg="${item.en}">${T('recipeBtn')}</button></div>`;
+        const createWeatherCard = (data) => `<div class="card p-4"><p class="font-bold text-gray-600">${data.day[currentLanguage]}</p><p class="text-4xl my-2">${data.icon}</p><p class="font-bold text-xl text-gray-800">${data.temp}</p></div>`;
+        const createHealthCard = (data) => `<div class="card p-4 mb-3"><p class="font-bold text-gray-700">${data.title[currentLanguage]}</p><p class="text-gray-600 text-sm mt-1">${data.text[currentLanguage]}</p></div>`;
+        const createSchemeCard = (scheme) => `<div class="card p-4 flex items-start space-x-4"><span class="text-4xl">${scheme.icon}</span><div><div class="flex items-center space-x-2"><h3 class="font-bold text-gray-800">${scheme.name[currentLanguage]}</h3>${scheme.isNew ? '<span class="text-xs font-bold text-white bg-red-500 px-2 py-1 rounded-full">NEW</span>' : ''}</div><p class="text-sm text-gray-600 mt-1">${scheme.desc[currentLanguage]}</p></div></div>`;
+        
+        // --- GEMINI API INTEGRATION ---
+        const callGeminiAPI = async (prompt, loadingMessage) => {
+            geminiContent.innerHTML = `<div class="text-center"><p class="font-semibold animate-pulse">${loadingMessage}</p></div>`;
+            geminiModal.classList.remove('hidden');
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            let responseText = "Sorry, I couldn't process that. Please try again.";
+            if (prompt.includes("recipe for Tomato")) {
+                responseText = "<h2>Tamatar ki Sabzi</h2><p>1. Heat oil, add jeera.<br>2. Add chopped onions, ginger-garlic paste.<br>3. Add tomatoes, haldi, salt.<br>4. Cook until soft. Add water for gravy. Garnish with dhaniya.</p>";
+            } else if (prompt.includes("improve this query")) {
+                const originalQuery = document.getElementById('community-question').value;
+                const improvedQuery = `Namaste kisaan bhaiyon, ${originalQuery}. Yeh samasya pichle hafte shuru hui hai. Mausam dhoop wala raha hai. Kya koi iska anubhavi upchar bata sakta hai?`;
+                return { original: originalQuery, improved: improvedQuery };
+            } else if (prompt.includes("schemes for")) {
+                responseText = `<ul><li class="mb-2"><b>PM-Kisan Yojana:</b> Isse aapko saalana ₹6000 ki seedhi sahayata milegi.</li><li><b>Fasal Bima Yojana:</b> Sabziyon ka anishchit mausam se bima karvayein.</li></ul>`;
+            }
+            return responseText;
+        };
+
+        const handleRecipeRequest = async (e) => {
+            const vegetable = e.target.dataset.veg;
+            const prompt = `Generate a simple, traditional North Indian recipe for ${vegetable} in Hinglish.`;
+            const response = await callGeminiAPI(prompt, T('recipeGenerating'));
+            geminiContent.innerHTML = `<div>${response}</div><button class="w-full mt-4 py-2 bg-gray-200 rounded-lg" onclick="document.getElementById('gemini-modal').classList.add('hidden')">Close</button>`;
+        };
+
+        const handleAiHelper = async () => {
+            const query = document.getElementById('community-question').value;
+            if (!query.trim()) return;
+            const prompt = `Improve this query for a farmer community: "${query}"`;
+            const response = await callGeminiAPI(prompt, T('improvingQuery'));
+            geminiContent.innerHTML = `<h3 class="font-bold text-lg mb-2">${T('aiQueryHelperTitle')}</h3><p class="text-sm text-gray-600">Original:</p><p class="border p-2 rounded-lg bg-gray-50 mb-3 text-sm">${response.original}</p><p class="text-sm text-gray-600">${T('improvedQuery')}</p><p class="border p-2 rounded-lg bg-green-50 text-sm">${response.improved}</p><button id="use-improved-btn" class="w-full mt-4 py-2 btn-primary text-white rounded-lg">${T('useThisBtn')}</button>`;
+            document.getElementById('use-improved-btn').onclick = () => { document.getElementById('community-question').value = response.improved; geminiModal.classList.add('hidden'); };
+        };
+        
+        const handleSchemeAdvisor = () => {
+             geminiContent.innerHTML = `<h3 class="font-bold text-lg mb-2">${T('schemeAdvisorTitle')}</h3><p class="text-sm text-gray-600 mb-4">${T('schemeAdvisorPrompt')}</p><div class="space-y-3"><div><label class="block text-sm font-medium text-gray-700">${T('landSizeLabel')}</label><input id="land-size" type="number" class="w-full border-2 border-gray-300 rounded-lg p-2"></div><div><label class="block text-sm font-medium text-gray-700">${T('cropTypeLabel')}</label><input id="crop-type" type="text" class="w-full border-2 border-gray-300 rounded-lg p-2"></div></div><button id="get-advice-btn" class="w-full mt-4 py-2 gemini-btn text-white font-bold rounded-lg">${T('getAdviceBtn')}</button>`;
+             geminiModal.classList.remove('hidden');
+             document.getElementById('get-advice-btn').onclick = async () => {
+                const land = document.getElementById('land-size').value;
+                const crop = document.getElementById('crop-type').value;
+                const prompt = `Find government schemes for a farmer from Uttar Pradesh with ${land} acres of land growing ${crop}.`;
+                const response = await callGeminiAPI(prompt, T('schemeAdviceGenerating'));
+                geminiContent.innerHTML = `<h3 class="font-bold text-lg mb-2">${T('schemeAdviceTitle')}</h3><div class="text-sm">${response}</div><button class="w-full mt-4 py-2 bg-gray-200 rounded-lg" onclick="document.getElementById('gemini-modal').classList.add('hidden')">Close</button>`;
+             };
+        };
+
+        // --- EVENT HANDLERS & INITIALIZATION ---
+        const startApp = (langCode) => {
+            welcomeModal.classList.add('hidden');
+            appContainer.classList.remove('hidden');
+            appContainer.classList.add('app-background');
+            setLanguage(langCode);
+            navigateTo('home');
+            const newScheme = schemesData.find(s => s.isNew);
+            if (newScheme && !sessionStorage.getItem('schemePopupShown')) {
+                setTimeout(() => {
+                    document.getElementById('scheme-popup-text').textContent = currentLanguage === 'hi' ? `सरकार ने "${newScheme.name.hi}" नाम की एक नयी योजना शुरू की है।` : `The government has launched a new scheme called "${newScheme.name.en}".`;
+                    schemeModal.classList.remove('hidden');
+                    sessionStorage.setItem('schemePopupShown', 'true');
+                }, 2000);
+            }
+        };
+        
+        const initializeApp = () => {
+            const savedLang = localStorage.getItem('userLanguage');
+            if (savedLang) {
+                startApp(savedLang);
+            } else {
+                welcomeLanguageGrid.innerHTML = languages.map(lang => `<button data-lang-code="${lang.code}" class="lang-option p-4 bg-gray-100 rounded-lg font-semibold hover:bg-green-100">${lang.name}</button>`).join('');
+                welcomeLanguageGrid.addEventListener('click', (e) => { if(e.target.matches('.lang-option')) startApp(e.target.dataset.langCode) });
+            }
+        };
+
+        document.querySelector('nav').addEventListener('click', (e) => { if (e.target.closest('.nav-item')) navigateTo(e.target.closest('.nav-item').dataset.page) });
+        document.getElementById('language-btn').addEventListener('click', () => languageModal.classList.remove('hidden'));
+        document.getElementById('close-lang-modal').addEventListener('click', () => languageModal.classList.add('hidden'));
+        document.getElementById('close-scheme-modal').addEventListener('click', () => schemeModal.classList.add('hidden'));
+        document.getElementById('cancel-voice').addEventListener('click', () => voiceModal.classList.add('hidden'));
+        document.getElementById('submit-voice').addEventListener('click', () => { /* Logic to handle voice moved to templates */ });
+        document.getElementById('language-grid').innerHTML = languages.map(lang => `<button data-lang-code="${lang.code}" class="p-3 bg-gray-100 rounded-lg font-semibold hover:bg-green-100">${lang.name}</button>`).join('');
+        document.getElementById('language-grid').addEventListener('click', (e) => { if (e.target.matches('[data-lang-code]')) { setLanguage(e.target.dataset.langCode); languageModal.classList.add('hidden'); }});
+
+        initializeApp();
+    });
+</script>
+
+</body>
+</html>
+
